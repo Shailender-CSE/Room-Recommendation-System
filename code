@@ -1,0 +1,185 @@
+#include<iostream>
+using namespace std;
+
+struct room{
+ int room_id; // unique room number
+
+ int rent_per_day;
+ int rent_per_week;
+ int rent_per_month;
+
+ float distance;  // distance from cityplace/ workplace(km)
+
+ int safety_rating; // 1 to 5
+ int facility_rating; // 1 to 5
+
+ bool allow_daily;
+ bool allow_weekly;
+ bool allow_monthly;
+
+};
+
+struct user_requirement{
+    int stay_type; //1= daily  2= weekly  3=monthly
+    int budget; //max. budget
+    int preference;  // 1=cheap  2=safe  3=near  4= balanced
+
+
+};
+
+struct matching_room{
+    room ROOM;
+    int rent;
+    int score;
+};
+
+
+
+
+int main(){
+
+     room rooms[5]={
+        {101, 500, 3000, 10000, 5.0, 4, 5, true, false, true},
+        {102, 700, 4000, 12000, 3.0, 5, 4, true, true, true},
+        {103, 600, 3500, 11000, 4.0, 3, 5, true, true, true},
+        {104, 800, 4500, 13000, 2.0, 5, 5, true, true, true},
+        {105, 550, 3200, 10500, 6.0, 4, 4, true, true, true}
+    };
+
+      cout << "Available Rooms:\n";
+    for (int i = 0; i < 5; i++) {
+        cout << "-> Room ID: " << rooms[i].room_id
+             << ", Distance: " << rooms[i].distance
+             << " km, Monthly Rent: " << rooms[i].rent_per_month
+             << ", Weekly Rent: " << rooms[i].rent_per_week
+             << ", Daily Basis Rent: " << rooms[i].rent_per_day
+             << endl;
+    }
+
+    user_requirement user_req;
+    cout<<"\nEnter stay type (1= For Days, 2= For Weeks, 3= For Months): ";  
+    cin>>user_req.stay_type;
+ 
+    cout<<"Enter your budget: ";
+    cin>>user_req.budget;
+    cout<<"Enter your preference (1=cheap, 2=safe, 3=near, 4=balanced): ";
+    cin>>user_req.preference;
+    cout<<"\nMatching rooms based on your requirements:\n";
+
+    int Exe_Once=0;
+    int count=0;
+    matching_room room_details[5];
+    
+
+    for (int i = 0; i < 5; i++) {
+        bool matches = false;
+        int rent = 0;
+
+        if (user_req.stay_type == 1 && rooms[i].allow_daily) {
+            rent = rooms[i].rent_per_day;
+        } else if (user_req.stay_type == 2 && rooms[i].allow_weekly) {
+            rent = rooms[i].rent_per_week;
+        } else if (user_req.stay_type == 3 && rooms[i].allow_monthly) {
+            rent = rooms[i].rent_per_month;
+        }
+
+        if (rent > 0 && rent <= user_req.budget) {
+        room_details[count].ROOM = rooms[i];
+        room_details[count].rent = rent;
+        room_details[count].score =
+        (user_req.budget - rent) +
+        (rooms[i].safety_rating * 10) +
+        (10 - rooms[i].distance) +
+        (rooms[i].facility_rating * 5);
+
+            count++;
+            Exe_Once = 1;
+        }
+
+     
+    }
+    
+    if(Exe_Once==0){
+        cout<<"\n No rooms match your requirements.\n\n";
+        return 0;
+    }
+
+
+    
+
+
+// Preference-based sorting----
+if (user_req.preference == 1) {
+    // CHEAP → rent ascending
+    for (int i = 0; i < count - 1; i++) {
+        for (int j = 0; j < count - i - 1; j++) {
+            if (room_details[j].rent > room_details[j + 1].rent) {
+                matching_room temp = room_details[j];
+                room_details[j] = room_details[j + 1];
+                room_details[j + 1] = temp;
+            }
+        }
+    }
+}
+else if (user_req.preference == 2) {
+    // SAFE → safety descending
+    for (int i = 0; i < count - 1; i++) {
+        for (int j = 0; j < count - i - 1; j++) {
+            if (room_details[j].ROOM.safety_rating <
+                room_details[j + 1].ROOM.safety_rating) {
+                matching_room temp = room_details[j];
+                room_details[j] = room_details[j + 1];
+                room_details[j + 1] = temp;
+            }
+        }
+    }
+}
+else if (user_req.preference == 3) {
+    // NEAR → distance ascending
+    for (int i = 0; i < count - 1; i++) {
+        for (int j = 0; j < count - i - 1; j++) {
+            if (room_details[j].ROOM.distance >
+                room_details[j + 1].ROOM.distance) {
+                matching_room temp = room_details[j];
+                room_details[j] = room_details[j + 1];
+                room_details[j + 1] = temp;
+            }
+        }
+    }
+}
+else if (user_req.preference == 4) {
+    // BALANCED → score descending
+    for (int i = 0; i < count - 1; i++) {
+        for (int j = 0; j < count - i - 1; j++) {
+            if (room_details[j].score <
+                room_details[j + 1].score) {
+                matching_room temp = room_details[j];
+                room_details[j] = room_details[j + 1];
+                room_details[j + 1] = temp;
+            }
+        }
+    }
+}
+
+
+
+
+
+    // printing matching rooms
+    for (int i = 0; i < count ; i++) {
+        if (room_details[i].rent != 0) {
+            cout << "-> Room ID: " << room_details[i].ROOM.room_id
+                 << ", Rent: " << room_details[i].rent
+                 <<"\n  Safety Rating: " << room_details[i].ROOM.safety_rating
+                    <<"\n Distance: " << room_details[i].ROOM.distance << " km"
+                    <<"\n Facility Rating: " << room_details[i].ROOM.facility_rating<<"\n"
+                 << endl;
+        }
+    
+
+   
+    }
+    
+return 0;
+
+}
